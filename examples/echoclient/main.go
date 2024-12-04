@@ -4,12 +4,10 @@ import (
 	"context"
 	"encoding/hex"
 	"flag"
-	"io"
 	"log"
 	"time"
 
 	"github.com/libp2p/go-libp2p/core/event"
-	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/libp2p/go-libp2p/core/peer"
 
@@ -20,27 +18,6 @@ import (
 
 const Protocol = "/echo/1.0.0"
 
-func sayHello(h host.Host, peerID peer.ID) (err error) {
-	log.Println("Trying to say hello to", peerID)
-	s, err := h.NewStream(context.Background(), peerID, Protocol)
-	if err != nil {
-		return
-	}
-	log.Println("sender saying hello")
-	_, err = s.Write([]byte("Hello, world!\n"))
-	if err != nil {
-		return
-	}
-
-	out, err := io.ReadAll(s)
-	if err != nil {
-		return
-	}
-
-	log.Printf("read reply: %q\n", out)
-	s.Close()
-	return
-}
 func main() {
 
 	var hexPSK string
@@ -97,12 +74,17 @@ func main() {
 
 		if err = client.ConnectToPeer(libp2pctx, p2pHost, peerRouting, relayAddrInfo, targetID); err != nil {
 			log.Println("Unable to connect to remote:", err)
+		} else {
+			break
 		}
-		err = sayHello(p2pHost, targetID)
-		if err != nil {
-			log.Println("ERROR saying hello", err)
-		}
+
 		time.Sleep(time.Second * 10)
 
+	}
+
+	// proxying request here
+	proxy := NewProxyService(libp2pctx, p2pHost)
+	if err := proxy.Serve("0.0.0.0:1082", targetID); err != nil {
+		log.Fatal(err)
 	}
 }

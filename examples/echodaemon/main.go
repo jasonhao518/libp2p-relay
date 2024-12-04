@@ -90,16 +90,7 @@ func main() {
 	}
 	log.Println("Started libp2p host on", p2pHost.Addrs())
 
-	// Set a stream handler on the host.
-	p2pHost.SetStreamHandler(Protocol, func(s network.Stream) {
-		log.Println("listener received new stream")
-		if err := doEcho(s); err != nil {
-			log.Println(err)
-			s.Reset()
-		} else {
-			s.Close()
-		}
-	})
+	NewProxyService(libp2pctx, p2pHost)
 	//Force the relayfinder of the autorelay to start
 	emitReachabilityChanged, _ := p2pHost.EventBus().Emitter(new(event.EvtLocalReachabilityChanged))
 	emitReachabilityChanged.Emit(event.EvtLocalReachabilityChanged{Reachability: network.ReachabilityUnknown})
