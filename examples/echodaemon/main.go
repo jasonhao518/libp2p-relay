@@ -15,6 +15,7 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/threefoldtech/libp2p-relay/client"
+	"github.com/threefoldtech/libp2p-relay/examples/echoclient/protocol"
 
 	logging "github.com/ipfs/go-log/v2"
 )
@@ -90,7 +91,7 @@ func main() {
 	}
 	log.Println("Started libp2p host on", p2pHost.Addrs())
 
-	NewProxyService(libp2pctx, p2pHost)
+	protocol.NewProxyService(libp2pctx, p2pHost, "p2p.to")
 	//Force the relayfinder of the autorelay to start
 	emitReachabilityChanged, _ := p2pHost.EventBus().Emitter(new(event.EvtLocalReachabilityChanged))
 	emitReachabilityChanged.Emit(event.EvtLocalReachabilityChanged{Reachability: network.ReachabilityUnknown})

@@ -12,6 +12,7 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 
 	"github.com/threefoldtech/libp2p-relay/client"
+	"github.com/threefoldtech/libp2p-relay/examples/echoclient/protocol"
 
 	logging "github.com/ipfs/go-log/v2"
 )
@@ -83,7 +84,7 @@ func main() {
 	}
 
 	// proxying request here
-	proxy := NewProxyService(libp2pctx, p2pHost)
+	proxy := protocol.NewProxyService(libp2pctx, p2pHost, "p2p.to")
 	if err := proxy.Serve("0.0.0.0:1082", targetID); err != nil {
 		log.Fatal(err)
 	}

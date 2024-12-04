@@ -1,4 +1,4 @@
-package main
+package protocol
 
 import (
 	"context"
@@ -25,13 +25,14 @@ const (
 var Log = logging.Logger("libp2p-proxy")
 
 type ProxyService struct {
-	ctx  context.Context
-	host host.Host
-	http *http.Server
+	ctx     context.Context
+	host    host.Host
+	http    *http.Server
+	p2pHost string
 }
 
-func NewProxyService(ctx context.Context, h host.Host) *ProxyService {
-	ps := &ProxyService{ctx, h, nil}
+func NewProxyService(ctx context.Context, h host.Host, p2pHost string) *ProxyService {
+	ps := &ProxyService{ctx, h, nil, p2pHost}
 	h.SetStreamHandler(ID, ps.Handler)
 	return ps
 }
@@ -117,7 +118,7 @@ func (p *ProxyService) ServeHTTP(handler http.Handler, s *http.Server) error {
 }
 
 func (p *ProxyService) isP2PHttp(host string) bool {
-	return false
+	return strings.HasPrefix(host, p.p2pHost)
 }
 
 func shouldLogError(err error) bool {
